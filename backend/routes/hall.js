@@ -1,104 +1,98 @@
+// backend/routes/hall.js
 const express = require('express');
 const router = express.Router();
-const Hall = require('../models/hall')
+const Hall = require('../models/hall');
+const User = require('../models/user');
+const Booking = require('../models/booking');
+const passport = require('../config/passport');
 
+// Middleware to check if user is authenticated
+// const isAuthenticated = (req, res, next) => {
+//   if (req.isAuthenticated()) {
+//     return next();
+//   }
+//   res.status(403).json({ error: 'Unauthorized' });
+// };
+const isAuthenticated = passport.authenticate('jwt', { session: false });
 
-router.get('/',(req,res)=>{
-    res.send({
-        msg:'Inside Hall Router'
-    })
-})
+// Middleware to check if user has specific roles
+const hasRole = (roles) => (req, res, next) => {
+  if (roles.includes(req.user.role)) {
+    return next();
+  }
+  res.status(403).json({ error: 'Forbidden' });
+};
 
+// Create Hall (Restricted to Registrar and CPO)
+router.post('/create_hall', isAuthenticated, hasRole(['Registrar', 'CPO']), async (req, res) => {
+  const { name, slots, reservedForOfficial } = req.body;
 
-
-
-
-
-// Create Hall Admin Restricted
-router.post('/create_hall',(req,res)=>{
-    if(req.isAuthenticated() && req.user.type === 'Admin'){
-        const newUser = new Hall({
-            name:req.body.name,
-            status:'Not Filled',
-            capacity:req.body.capacity,
-            department:'',
-            event:''
-        });
-
-        newUser.save()
-            .then((user) => {
-            res.status(201).json(user);
-            })
-            .catch((error) => {
-            res.status(500).json({ error: 'Failed to create user' });
-            });
-    }
-
-    else{
-        res.send({
-            msg:"You are not authorized to create hall"
-        })
-    }
-})
-
-
-
-
-// Getting all the Halls
-router.get('/view_halls', (req,res)=>{
-    Hall.find({},{ _id: 0 })
-  .then((halls) => {
-    res.send({
-        halls:halls
-    })
-  })
-  .catch((error) => {
-    res.send({
-        err:err
-    })
+  const newHall = new Hall({
+    name,
+    slots,
+    reservedForOfficial
   });
 
-})
+  try {
+    const savedHall = await newHall.save();
+    res.status(201).json(savedHall);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to create hall' });
+  }
+});
 
+// Get All Halls
+router.get('/view_halls', async (req, res) => {
+  try {
+    const halls = await Hall.find({});
+    res.json(halls);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch halls' });
+  }
+});
 
+// Get All Halls with Booking Status
+router.get('/halls-status', async (req, res) => {
+  try {
+    const halls = await Hall.find({});
+    const currentDate = new Date();
+    const bookings = await Booking.find({
+      date: { $gte: currentDate },
+      status: { $in: ['Approved', 'Pending'] }
+    }).populate('venue');
 
+    const hallsWithStatus = halls.map(hall => {
+      const hallBookings = bookings.filter(booking => booking.venue._id.toString() === hall._id.toString());
+      return {
+        ...hall.toObject(),
+        bookings: hallBookings.map(booking => ({
+          date: booking.date,
+          slot: booking.slot,
+          type: booking.type
+        }))
+      };
+    });
 
+    res.json(hallsWithStatus);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch halls with status' });
+  }
+});
 
-// Change the status of the halls
-router.post('/clear_hall',async (req,res)=>{
-    
-    if(req.isAuthenticated() && req.user.type === 'Admin'){
-        try{
-            const updatedDocument = await Hall.findOneAndUpdate(
-                { name: req.body.name },
-                {department:"",event:"",status:"Not Filled"},
-                { new: true }
-              );
-              res.send({
-                status:'Changed Status',
-                updates:updatedDocument
-              })
-        }
-        catch(err){
-            res.send({
-                error:err
-            })
-        }
-    }
-    else{
-        res.send({
-            msg:'You are not authorized'
-        })
-    }
-})
+// // Clear Hall Status (Restricted to Registrar and CPO)
+// router.post('/clear_hall', isAuthenticated, hasRole(['Registrar', 'CPO']), async (req, res) => {
+//   const { name } = req.body;
 
-
-
-
-
-
-
-
-
+//   try {
+//     const updatedHall = await Hall.findOneAndUpdate(
+//       { name },
+//       { $set: { 'slots.$[].status': 'Not Filled' } },
+//       { new: true }
+//     );
+//     res.json(updatedHall);
+//   } catch (error) {
+//     res.status(500).json({ error: 'Failed to clear hall status' });
+//   }
+// });
 
 module.exports = router;

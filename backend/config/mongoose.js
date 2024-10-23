@@ -1,14 +1,22 @@
-const details = require('../routes/constants');
 const mongoose = require('mongoose');
-// mongodb+srv://mohantyrohan:<password>@cluster0.llzjwsh.mongodb.net/?retryWrites=true&w=majority
-// mongodb://localhost:27017/seminar_hall_DB
-mongoose.connect(`mongodb+srv://mohantyrohan:${details.MONGO_Password}@cluster0.llzjwsh.mongodb.net/seminar_hall_DB?retryWrites=true&w=majority`,{
-    // family: 4 // Uses Ipv4
+
+// MongoDB connection string
+const dbURI = 'mongodb://localhost:27017/new_new_clone';
+
+// Connect to MongoDB
+mongoose.connect(dbURI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
 });
 
 const db = mongoose.connection;
-db.on('error', console.error.bind(console,'Error Connecting to Db'));
 
-db.once('open',function(){
-    console.log('Successfully Connected To database');
+// Handle connection errors
+db.on('error', console.error.bind(console, 'Error connecting to MongoDB:'));
+
+// Handle successful connection
+db.once('open', () => {
+  console.log('Successfully connected to MongoDB');
 });
+
+module.exports = db;
