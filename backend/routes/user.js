@@ -74,8 +74,8 @@ router.post('/login', async (req, res) => {
     res.json({ 
       message: 'Login successful', 
       token,
-      user: { id: user.id, email: user.email, role: user.role, name: user.name},
-      redirectTo: '/dashboard'
+      user: { id: user.id, email: user.email, role: user.role, name: user.name, isAdmin: user.isAdmin },
+      redirectTo: user.isAdmin ? '/admin' : '/dashboard'
     });
   } catch (error) {
     res.status(500).json({ error: 'Internal server error', redirectTo: '/login' });

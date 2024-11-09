@@ -13,7 +13,7 @@ const LoginSchema = Yup.object().shape({
 const LoginForm = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { loading, error } = useSelector((state) => state.auth);
+  const { loading, error, redirectTo } = useSelector((state) => state.auth);
 
   useEffect(() => {
     return () => {
@@ -21,12 +21,15 @@ const LoginForm = () => {
     };
   }, [dispatch]);
 
+  useEffect(() => {
+    if (redirectTo) {
+      navigate(redirectTo);
+    }
+  }, [redirectTo, navigate]);
+
   const handleSubmit = async (values, { setSubmitting }) => {
     try {
-      const resultAction = await dispatch(loginUser(values));
-      if (loginUser.fulfilled.match(resultAction)) {
-        navigate('/dashboard');
-      }
+      await dispatch(loginUser(values)).unwrap();
     } catch (err) {
       console.error('Login failed:', err);
     } finally {
@@ -44,8 +47,8 @@ const LoginForm = () => {
         {({ isSubmitting }) => (
           <Form className="bg-gradient-to-t from-gray-50 via-gray-200 to-gray-300 shadow-md rounded px-8 pt-6 pb-8 mb-4">
             <h2 className="text-center text-3xl font-extrabold text-gray-900 mb-6">
-          Sign In
-        </h2>
+              Sign In
+            </h2>
             <div className="mb-4">
               <label htmlFor="email" className="block text-gray-700 text-sm font-bold mb-2">
                 Email

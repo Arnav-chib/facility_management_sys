@@ -1,11 +1,13 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchPendingApprovals, approveBookingByHOD, approveBookingByFinal, rejectBooking } from '@/store/slices/bookingSlice';
+import ViewBookingDetails from '../MyBookings/ViewBookingDetails';
 
 const ApprovalsList = () => {
   const dispatch = useDispatch();
   const { pendingApprovals, loading, error } = useSelector((state) => state.booking);
   const { user } = useSelector((state) => state.auth);
+  const [selectedBooking, setSelectedBooking] = useState(null);
 
   useEffect(() => {
     dispatch(fetchPendingApprovals());
@@ -15,9 +17,9 @@ const ApprovalsList = () => {
     try {
       if (user.role === 'HOD') {
         await dispatch(approveBookingByHOD(bookingId));
-    } else {
-      await dispatch(approveBookingByFinal(bookingId));
-    }
+      } else {
+        await dispatch(approveBookingByFinal(bookingId));
+      }
       dispatch(fetchPendingApprovals());
     } catch (error) {
       console.error('Error approving booking:', error);
@@ -56,23 +58,38 @@ const ApprovalsList = () => {
               <p className="text-gray-600">Type: {booking.type}</p>
               <p className="text-gray-600">Applicant: {booking.applicant.name} ({booking.applicant.email})</p>
               <p className="text-gray-600">Department: {booking.applicant.department}</p>
-              <div className="mt-4 flex justify-between">
+              <div className="mt-4 flex justify-between items-center">
                 <button
-                  onClick={() => handleApprove(booking._id)}
-                  className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600 transition-colors duration-300"
+                  onClick={() => setSelectedBooking(booking)}
+                  className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 transition-colors duration-300"
                 >
-                  Approve
+                  View Details
                 </button>
-                <button
-                  onClick={() => handleReject(booking._id)}
-                  className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 transition-colors duration-300"
-                >
-                  Reject
-                </button>
+                <div className="flex space-x-2">
+                  <button
+                    onClick={() => handleApprove(booking._id)}
+                    className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600 transition-colors duration-300"
+                  >
+                    Approve
+                  </button>
+                  <button
+                    onClick={() => handleReject(booking._id)}
+                    className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 transition-colors duration-300"
+                  >
+                    Reject
+                  </button>
+                </div>
               </div>
             </li>
           ))}
         </ul>
+      )}
+
+      {selectedBooking && (
+        <ViewBookingDetails
+          booking={selectedBooking}
+          onClose={() => setSelectedBooking(null)}
+        />
       )}
     </div>
   );

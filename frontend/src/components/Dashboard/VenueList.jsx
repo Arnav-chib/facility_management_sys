@@ -1,3 +1,4 @@
+// frontend/src/components/Dashboard/VenueList.jsx
 import { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchVenues, clearVenuesWithStatus } from '@/store/slices/venueSlice';
@@ -15,10 +16,12 @@ const VenueList = () => {
     dispatch(fetchVenues());
   }, [dispatch]);
 
-  const filteredVenues = venues.filter(venue =>
-    (venue.name?.toLowerCase().includes(searchTerm.toLowerCase()) || false) ||
-    (venue.location?.toLowerCase().includes(searchTerm.toLowerCase()) || false)
-  );
+  const filteredVenues = venues
+    .filter(venue =>
+      (venue.name?.toLowerCase().includes(searchTerm.toLowerCase()) || false) ||
+      (venue.location?.toLowerCase().includes(searchTerm.toLowerCase()) || false)
+    )
+    .sort((a, b) => (a.name || '').localeCompare(b.name || ''));
 
   if (loading) {
     return <div className="text-center mt-8">Loading venues...</div>;
@@ -36,7 +39,7 @@ const VenueList = () => {
         placeholder="Search venues by name or location..."
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
-        className="w-full p-2 mb-4 border border-gray-300 rounded"
+        className="w-full p-2 mb-4 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
       />
       {filteredVenues.length === 0 ? (
         <p className="text-center text-gray-600">No venues found.</p>
@@ -72,7 +75,7 @@ const VenueList = () => {
           onClose={() => {
             setSelectedVenue(null);
             dispatch(clearVenuesWithStatus());
-        }} 
+          }} 
         />
       )}
       {showBookingForm && (

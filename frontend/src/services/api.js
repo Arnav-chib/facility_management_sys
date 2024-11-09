@@ -49,4 +49,10 @@ export const bookingService = {
   deleteBooking: (bookingId) => api.delete(`/booking/${bookingId}`),
 };
 
+export const adminService = {
+  getAllBookings: () => api.get('/admin/bookings'),
+  deleteBooking: (id) => api.delete(`/admin/bookings/${id}`),
+  getVenueAnalytics: (id) => api.get(`/admin/venues/${id}/analytics`),
+};
+
 export default api;

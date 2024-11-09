@@ -9,6 +9,9 @@ import MyBookingsPage from './Pages/MyBookingsPage';
 import ApprovalsPage from './Pages/ApprovalsPage';
 import LoginPage from './Pages/LoginPage';
 import PrivateRoute from './components/PrivateRoute';
+import AdminDashboard from './components/Admin/AdminDashboard';
+import AdminBookingsList from './components/Admin/AdminBookingsList';
+import AdminVenueList from './components/Admin/AdminVenueList';
 
 function App() {
   return (
@@ -26,6 +29,10 @@ function App() {
                 </PrivateRoute>
               }
             />
+            <Route path="/admin" element={<PrivateRoute requireAdmin={true}><AdminDashboard /></PrivateRoute>}>
+              <Route index element={<AdminBookingsList />} />
+              <Route path="venues" element={<AdminVenueList />} />
+            </Route>
             <Route
               path="/my-bookings"
               element={

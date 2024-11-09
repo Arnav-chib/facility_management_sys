@@ -3,6 +3,7 @@ import authReducer from './slices/authSlice';
 import venueReducer from './slices/venueSlice';
 import bookingReducer from './slices/bookingSlice';
 import approvalReducer from './slices/approvalSlice';
+import adminReducer from './slices/adminSlice';
 
 const store = configureStore({
     reducer: {
@@ -10,6 +11,7 @@ const store = configureStore({
       venue: venueReducer,
       booking: bookingReducer,
       approval: approvalReducer,
+      admin: adminReducer,
     },
     middleware: (getDefaultMiddleware) =>
       getDefaultMiddleware({

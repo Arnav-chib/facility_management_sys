@@ -24,7 +24,7 @@ import Navbar from './Navbar';
 
 const Layout = () => {
   const location = useLocation();
-  const isLoginPage = location.pathname === '/login';
+  const isLoginPage = location.pathname === '/login' || location.pathname === '/';
 
   return (
     <div

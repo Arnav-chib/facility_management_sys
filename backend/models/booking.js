@@ -12,7 +12,23 @@ const bookingSchema = new mongoose.Schema({
   alternateDate: {type: Date},
   alternateSlot: { type: String, enum: ['Forenoon', 'Afternoon']},
   approvedByHOD: { type: Boolean, default: false },
-  approvedByFinalApprover: { type: Boolean, default: false }
+  approvedByFinalApprover: { type: Boolean, default: false },
+  applicantName: String,
+  branch: String,
+  rollNo: String,
+  studentMobile: String,
+  facultyMobile: String,
+  facultyEmail: String,
+  eventPurpose: String,
+  hoardingsCount: String,
+  hoardingsLocations: String,
+  equipmentsRequired: String,
+  operatorsDuringOfficeHours: { type: Boolean, default: false },
+  operatorTypes: String,
+  operatorsAfterOfficeHours: { type: Boolean, default: false },
+  operatorCompensation: String,
+  justification: String,
+  undertaking: { type: Boolean, default: false }
 });
 
 bookingSchema.pre('save', async function(next) {
